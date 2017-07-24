@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,18 +12,30 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace EndModLoader
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
+        private const string EndIsNighPath = "C:/Program Files (x86)/Steam/steamapps/common/theendisnigh/";
+        private readonly string ModPath = Path.Combine(EndIsNighPath, "mods");
+
         public MainWindow()
         {
             InitializeComponent();
+
+            if (!FileSystem.EnsureDir(EndIsNighPath, ModPath))
+            {
+                MessageBox.Show("");
+            }
+
+            var mods = FileSystem.ReadModFolder(ModPath);
+            ModList.ItemsSource = mods;
+        }
+
+        private void PlayButton_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException(nameof(PlayButton));
         }
     }
 }
