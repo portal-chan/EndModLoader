@@ -4,6 +4,15 @@
              xmlns:local="clr-namespace:EndModLoader"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <Style x:Key="TitleText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+        </Style>
+
+        <Style x:Key="DescriptionText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="Gray" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+        </Style>
     </Application.Resources>
 </Application>
