@@ -13,15 +13,27 @@ namespace EndModLoader
         public string Title { get; set; }
         public string Author { get; set; }
         public string Version { get; set; }
+        public string ModPath { get; set; }
+
+        public static readonly string MetaFile = "meta.xml";
+        public static readonly string MetaFileNotFound = $"no {MetaFile} found";
 
         public override string ToString() => $"{Title} {Author} {Version}";
 
-        public static Mod ReadMetadata(string path)
+        public static Mod FromPath(string path)
         {
+            var mod = new Mod { ModPath = path };
+
+            var meta = Path.Combine(path, MetaFile);
+            if (!File.Exists(meta))
+            {
+                mod.Title = new DirectoryInfo(path).Name;
+                return mod;
+            }
+
             try
             {
-                var mod = new Mod();
-                var doc = XDocument.Load(path);
+                var doc = XDocument.Load(meta);
 
                 foreach (var element in doc.Root.Elements())
                 {
@@ -29,13 +41,10 @@ namespace EndModLoader
                     else if (element.Name == "author") mod.Author = element.Value;
                     else if (element.Name == "version") mod.Version = element.Value;
                 }
+            }
+            catch (FileNotFoundException e) { }
 
-                return mod;
-            }
-            catch (FileNotFoundException e)
-            {
-                return new Mod { };
-            }
+            return mod;
         }
     }
 }

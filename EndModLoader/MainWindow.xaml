@@ -17,8 +17,8 @@
                     <StackPanel Margin="0.2" Orientation="Vertical">
                         <TextBlock Text="{Binding Title}" Style="{StaticResource TitleText}"/>
                         <Grid>
-                            <TextBlock Text="{Binding Author, StringFormat='by {0}'}" Style="{StaticResource DescriptionText}"/>
-                            <TextBlock Text="{Binding Version}" Style="{StaticResource DescriptionText}" TextAlignment="Right"/>
+                            <TextBlock Text="{Binding Author, StringFormat='by {0}', TargetNullValue='{x:Static local:Mod.MetaFileNotFound}'}" Style="{StaticResource DescriptionText}"/>
+                            <TextBlock Text="{Binding Version, TargetNullValue=''}" Style="{StaticResource DescriptionText}" TextAlignment="Right"/>
                         </Grid>
                     </StackPanel>
                 </DataTemplate>
