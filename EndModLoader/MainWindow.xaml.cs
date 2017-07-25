@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,6 +19,7 @@ namespace EndModLoader
     public partial class MainWindow : Window
     {
         private const string EndIsNighPath = "C:/Program Files (x86)/Steam/steamapps/common/theendisnigh/";
+        private const string ExeName = "TheEndIsNigh.exe";
         private readonly string ModPath = Path.Combine(EndIsNighPath, "mods");
 
         public MainWindow()
@@ -33,9 +35,29 @@ namespace EndModLoader
             ModList.ItemsSource = mods;
         }
 
-        private void PlayButton_Click(object sender, RoutedEventArgs e)
+        private async void PlayButton_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException(nameof(PlayButton));
+            var modToPlay = ModList.SelectedItem as Mod;
+            FileSystem.LoadMod(modToPlay, EndIsNighPath);
+
+            Process.Start(Path.Combine(EndIsNighPath, ExeName));
+            await HookGameExit("TheEndIsNigh", (s, ev) =>
+            {
+                MessageBox.Show("fuck");
+                FileSystem.UnloadAll(EndIsNighPath);
+            });
+        }
+
+        private async Task HookGameExit(string process, EventHandler hook)
+        {
+            // Since Steam's "launching..." exits and starts the games process,
+            // we can't simply hook the Process.Start return value and instead
+            // have to wait 5 seconds hoping the real process launches and hook
+            // that instead.
+            await Task.Delay(5000);
+            var end = Process.GetProcessesByName(process).First();
+            end.EnableRaisingEvents = true;
+            end.Exited += hook;
         }
     }
 }
