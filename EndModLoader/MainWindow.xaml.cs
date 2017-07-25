@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,15 +17,33 @@ using System.Windows.Navigation;
 
 namespace EndModLoader
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private const string EndIsNighPath = "C:/Program Files (x86)/Steam/steamapps/common/theendisnigh/";
         private const string ExeName = "TheEndIsNigh.exe";
         private readonly string ModPath = Path.Combine(EndIsNighPath, "mods");
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void NotifyPropertyChanged(string property) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+
+        private bool _inGame;
+        public bool InGame
+        {
+            get => _inGame;
+            set
+            {
+                _inGame = value;
+                NotifyPropertyChanged(nameof(InGame));
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = this;
+            InGame = false;
 
             if (!FileSystem.EnsureDir(EndIsNighPath, ModPath))
             {
@@ -37,13 +56,15 @@ namespace EndModLoader
 
         private async void PlayButton_Click(object sender, RoutedEventArgs e)
         {
+            InGame = true;
+
             var modToPlay = ModList.SelectedItem as Mod;
             FileSystem.LoadMod(modToPlay, EndIsNighPath);
 
             Process.Start(Path.Combine(EndIsNighPath, ExeName));
             await HookGameExit("TheEndIsNigh", (s, ev) =>
             {
-                MessageBox.Show("fuck");
+                InGame = false;
                 FileSystem.UnloadAll(EndIsNighPath);
             });
         }
