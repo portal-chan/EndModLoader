@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,21 +9,56 @@ using System.Xml.Linq;
 
 namespace EndModLoader
 {
-    public class Mod
+    public class Mod : IComparable<Mod>
     {
-        public string Title { get; set; }
-        public string Author { get; set; }
-        public string Version { get; set; }
-        public string ModPath { get; set; }
+        public string Title { get; private set; }
+        public string Author { get; private set; }
+        public string Version { get; private set; }
+        public string ModPath { get; private set; }
+        public bool IsZip { get; private set; }
 
         public static readonly string MetaFile = "meta.xml";
         public static readonly string MetaFileNotFound = $"no {MetaFile} found";
 
         public override string ToString() => $"{Title} {Author} {Version}";
 
+        public int CompareTo(Mod other) => Title.CompareTo(other.Title);
+
+        public static Mod FromZip(string path)
+        {
+            var mod = new Mod { ModPath = path, IsZip = true };
+
+            var zip = ZipFile.Open(path, ZipArchiveMode.Read);
+            var meta = zip.GetEntry(MetaFile);
+
+            if (meta == null)
+            {
+                mod.Title = Path.GetFileNameWithoutExtension(path);
+                return mod;
+            }
+
+            try
+            {
+                var stream = meta.Open();
+                var doc = XDocument.Load(stream);
+                foreach (var element in doc.Root.Elements())
+                {
+                    if (element.Name == "title") mod.Title = element.Value;
+                    else if (element.Name == "author") mod.Author = element.Value;
+                    else if (element.Name == "version") mod.Version = element.Value;
+                }
+                // Seems to need to be closed explicitly,
+                // a `using` block doesn't close it by itself.
+                stream.Close();
+            }
+            catch (FileNotFoundException e) { }
+
+            return mod;
+        }
+
         public static Mod FromPath(string path)
         {
-            var mod = new Mod { ModPath = path };
+            var mod = new Mod { ModPath = path, IsZip = false };
 
             var meta = Path.Combine(path, MetaFile);
             if (!File.Exists(meta))

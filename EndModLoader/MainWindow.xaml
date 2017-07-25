@@ -8,10 +8,13 @@
         Title="The End is Nigh MOD Loader" Height="380" Width="525" MinHeight="200" MinWidth="300">
     <Grid Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <ListBox Name="ModList" HorizontalContentAlignment="Stretch" Grid.Row="0">
+        <TextBox Name="PathTextBox" Text="{Binding EndIsNighPath}" Margin="0,0,0,10">
+        </TextBox>
+        <ListBox ItemsSource="{Binding Mods}" Name="ModList" HorizontalContentAlignment="Stretch" Grid.Row="1" SelectionChanged="ModList_SelectionChanged" MouseDoubleClick="ModList_MouseDoubleClick">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Margin="0.2" Orientation="Vertical">
@@ -24,6 +27,6 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button Name="PlayButton" Style="{StaticResource PlayModButton}" Grid.Row="1" Click="PlayButton_Click"></Button>
+        <Button Name="PlayButton" Style="{StaticResource PlayModButton}" Grid.Row="2" Click="PlayButton_Click"></Button>
     </Grid>
 </Window>

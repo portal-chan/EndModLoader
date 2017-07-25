@@ -19,15 +19,23 @@
             <Setter Property="Content" Value="Play MOD"></Setter>
             <Setter Property="HorizontalAlignment" Value="Left"></Setter>
             <Setter Property="Margin" Value="0,10,0,0"></Setter>
-            <Setter Property="Width" Value="90"></Setter>
+            <Setter Property="Width" Value="110"></Setter>
             <Style.Triggers>
-                <DataTrigger Binding="{Binding InGame}" Value="True">
-                    <Setter Property="Content" Value="In Game"></Setter>
+                <DataTrigger Binding="{Binding AppState}" Value="{x:Static local:AppState.NoModsFound}">
+                    <Setter Property="Content" Value="No Mods Found"></Setter>
                     <Setter Property="IsEnabled" Value="False"></Setter>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding InGame}" Value="False">
+                <DataTrigger Binding="{Binding AppState}" Value="{x:Static local:AppState.NoModSelected}">
+                    <Setter Property="Content" Value="No Mod Selected"></Setter>
+                    <Setter Property="IsEnabled" Value="False"></Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding AppState}" Value="{x:Static local:AppState.ReadyToPlay}">
                     <Setter Property="Content" Value="Play MOD"></Setter>
                     <Setter Property="IsEnabled" Value="True"></Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding AppState}" Value="{x:Static local:AppState.InGame}">
+                    <Setter Property="Content" Value="In Game"></Setter>
+                    <Setter Property="IsEnabled" Value="False"></Setter>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
