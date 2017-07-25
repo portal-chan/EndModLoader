@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,11 @@ namespace EndModLoader
 
         public static IEnumerable<Mod> ReadModFolder(string path)
         {
-            // TODO: Make this use .zip files      or whatever.
+            foreach (var file in Directory.GetFiles(path, "*.zip", SearchOption.TopDirectoryOnly))
+            {
+                yield return Mod.FromZip(file);
+            }
+
             foreach (var dir in Directory.EnumerateDirectories(path))
             {
                 yield return Mod.FromPath(dir);
@@ -40,7 +45,14 @@ namespace EndModLoader
 
         public static void LoadMod(Mod mod, string path)
         {
-            CopyDirectory(mod.ModPath, path, ModFolders);
+            if (mod.IsZip)
+            {
+                ZipFile.ExtractToDirectory(mod.ModPath, path);
+            }
+            else
+            {
+                CopyDirectory(mod.ModPath, path, ModFolders);
+            }
         }
 
         public static void UnloadAll(string path)

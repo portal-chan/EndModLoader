@@ -19,23 +19,29 @@ namespace EndModLoader
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private const string EndIsNighPath = "C:/Program Files (x86)/Steam/steamapps/common/theendisnigh/";
+        private static readonly string DefaultEndIsNighPath = Environment.Is64BitOperatingSystem ? 
+            "C:/Program Files (x86)/Steam/steamapps/common/theendisnigh/" :
+            "C:/Program Files/Steam/steamapps/common/theendisnigh/";
+
+        public string EndIsNighPath { get; set; } = DefaultEndIsNighPath;
         private const string ExeName = "TheEndIsNigh.exe";
-        private readonly string ModPath = Path.Combine(EndIsNighPath, "mods");
+        private string ModPath { get => Path.Combine(EndIsNighPath, "mods"); }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void NotifyPropertyChanged(string property) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
 
-        private bool _inGame;
-        public bool InGame
+        public List<Mod> Mods { get; private set; }
+
+        private AppState _appState;
+        public AppState AppState
         {
-            get => _inGame;
+            get => _appState;
             set
             {
-                _inGame = value;
-                NotifyPropertyChanged(nameof(InGame));
+                _appState = value;
+                NotifyPropertyChanged(nameof(AppState));
             }
         }
 
@@ -43,30 +49,35 @@ namespace EndModLoader
         {
             InitializeComponent();
             DataContext = this;
-            InGame = false;
+            AppState = AppState.NoModSelected;
 
             if (!FileSystem.EnsureDir(EndIsNighPath, ModPath))
             {
                 MessageBox.Show("");
             }
 
-            var mods = FileSystem.ReadModFolder(ModPath);
-            ModList.ItemsSource = mods;
+            Mods = FileSystem.ReadModFolder(ModPath).ToList();
+            Mods.Sort();
+
+            if (Mods.Count == 0)
+            {
+                AppState = AppState.NoModsFound;
+            }
         }
 
-        private async void PlayButton_Click(object sender, RoutedEventArgs e)
+        private async Task PlayMod(Mod mod)
         {
-            InGame = true;
+            MessageBox.Show(EndIsNighPath);
+            //AppState = AppState.InGame;
+            //FileSystem.UnloadAll(EndIsNighPath);
+            //FileSystem.LoadMod(mod, EndIsNighPath);
+            //Process.Start(Path.Combine(EndIsNighPath, ExeName));
 
-            var modToPlay = ModList.SelectedItem as Mod;
-            FileSystem.LoadMod(modToPlay, EndIsNighPath);
-
-            Process.Start(Path.Combine(EndIsNighPath, ExeName));
-            await HookGameExit("TheEndIsNigh", (s, ev) =>
-            {
-                InGame = false;
-                FileSystem.UnloadAll(EndIsNighPath);
-            });
+            //await HookGameExit("TheEndIsNigh", (s, ev) =>
+            //{
+            //    AppState = AppState.ReadyToPlay;
+            //    FileSystem.UnloadAll(EndIsNighPath);
+            //});
         }
 
         private async Task HookGameExit(string process, EventHandler hook)
@@ -80,5 +91,14 @@ namespace EndModLoader
             end.EnableRaisingEvents = true;
             end.Exited += hook;
         }
+
+        private async void PlayButton_Click(object sender, RoutedEventArgs e) =>
+            await PlayMod(ModList.SelectedItem as Mod);
+
+        private async void ModList_MouseDoubleClick(object sender, MouseButtonEventArgs e) =>
+            await PlayMod(ModList.SelectedItem as Mod);
+
+        private void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e) =>
+            AppState = AppState.ReadyToPlay;
     }
 }
