@@ -24,6 +24,6 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button Name="PlayButton" Content="Play MOD" Grid.Row="1" Margin="0,10,0,0" HorizontalAlignment="Left" Width="90" Click="PlayButton_Click"></Button>
+        <Button Name="PlayButton" Style="{StaticResource PlayModButton}" Grid.Row="1" Click="PlayButton_Click"></Button>
     </Grid>
 </Window>
