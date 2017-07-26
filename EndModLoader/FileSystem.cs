@@ -4,6 +4,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 
+using System.Threading.Tasks;
+
 namespace EndModLoader
 {
     public static class FileSystem
@@ -13,9 +15,10 @@ namespace EndModLoader
 
         public static IEnumerable<Mod> ReadModFolder(string path)
         {
-            foreach (var file in Directory.GetFiles(path, "*.zip", SearchOption.AllDirectories))
+            foreach (var file in Directory.GetFiles(path, "*.zip", SearchOption.TopDirectoryOnly))
             {
-                yield return Mod.FromZip(file);
+                var mod = Mod.FromZip(file);
+                if (mod != null) yield return Mod.FromZip(file);
             }
         }
 
@@ -28,6 +31,7 @@ namespace EndModLoader
             Watcher = new FileSystemWatcher
             {
                 Path = path,
+                Filter = "*.zip",
                 NotifyFilter = NotifyFilters.LastAccess |
                                NotifyFilters.LastWrite |
                                NotifyFilters.CreationTime |

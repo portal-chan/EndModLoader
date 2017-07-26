@@ -68,14 +68,17 @@ namespace EndModLoader
         private void OnAdd(object sender, FileSystemEventArgs e)
         {
             var added = Mod.FromZip(e.FullPath);
-            Dispatcher.Invoke(() =>
+            if (added != null)
             {
-                // Due to ObservableCollection not firing a notify event when it's sorted,
-                // it's simpler to insert the new mod at it's sorted index.
-                int i = 0;
-                while (i < Mods.Count && Mods[i].CompareTo(added) < 0) ++i;
-                Mods.Insert(i, added);
-            });
+                Dispatcher.Invoke(() =>
+                {
+                    // Due to ObservableCollection not firing a notify event when it's sorted,
+                    // it's simpler to insert the new mod at it's sorted index.
+                    int i = 0;
+                    while (i < Mods.Count && Mods[i].CompareTo(added) < 0) ++i;
+                    Mods.Insert(i, added);
+                });
+            }
         }
 
         private void OnRemove(object sender, FileSystemEventArgs e)
@@ -92,7 +95,7 @@ namespace EndModLoader
             var find = Mods.Where(m => m.ModPath == e.OldFullPath).FirstOrDefault();
             var renamed = Mod.FromZip(e.FullPath);
 
-            if (find != null)
+            if (find != null && renamed != null)
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -108,17 +111,20 @@ namespace EndModLoader
 
         private async Task PlayMod(Mod mod)
         {
-            AppState = AppState.InGame;
-            FileSystem.UnloadAll(EndIsNighPath);
-
-            FileSystem.LoadMod(mod, EndIsNighPath);
-            Process.Start(Path.Combine(EndIsNighPath, ExeName));
-
-            await HookGameExit("TheEndIsNigh", (s, ev) =>
+            if (AppState == AppState.ReadyToPlay)
             {
-                AppState = AppState.ReadyToPlay;
+                AppState = AppState.InGame;
                 FileSystem.UnloadAll(EndIsNighPath);
-            });
+
+                FileSystem.LoadMod(mod, EndIsNighPath);
+                Process.Start(Path.Combine(EndIsNighPath, ExeName));
+
+                await HookGameExit("TheEndIsNigh", (s, ev) =>
+                {
+                    AppState = AppState.ReadyToPlay;
+                    FileSystem.UnloadAll(EndIsNighPath);
+                });
+            }
         }
 
         private async Task HookGameExit(string process, EventHandler hook)
@@ -138,6 +144,12 @@ namespace EndModLoader
 
         private async void ModList_MouseDoubleClick(object sender, MouseButtonEventArgs e) =>
             await PlayMod(ModList.SelectedItem as Mod);
+
+        private async void ModList_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                await PlayMod(ModList.SelectedItem as Mod);
+        }
 
         private void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e) =>
             AppState = AppState.ReadyToPlay;
