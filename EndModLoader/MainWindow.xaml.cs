@@ -56,12 +56,56 @@ namespace EndModLoader
             {
                 AppState = AppState.NoModsFound;
             }
+
+            FileSystem.EnableWatching(ModPath, OnAdd, OnRemove, OnRename);
+        }
+
+        private void OnAdd(object sender, FileSystemEventArgs e)
+        {
+            var added = Mod.FromZip(e.FullPath);
+            Dispatcher.Invoke(() =>
+            {
+                // Due to ObservableCollection not firing a notify event when it's sorted,
+                // it's simpler to insert the new mod at it's sorted index.
+                int i = 0;
+                while (i < Mods.Count && Mods[i].CompareTo(added) < 0) ++i;
+                Mods.Insert(i, added);
+            });
+        }
+
+        private void OnRemove(object sender, FileSystemEventArgs e)
+        {
+            var find = Mods.Where(m => m.ModPath == e.FullPath).FirstOrDefault();
+            if (find != null)
+            {
+                Dispatcher.Invoke(() => Mods.Remove(find));
+            }
+        }
+
+        private void OnRename(object sender, RenamedEventArgs e)
+        {
+            var find = Mods.Where(m => m.ModPath == e.OldFullPath).FirstOrDefault();
+            var renamed = Mod.FromZip(e.FullPath);
+
+            if (find != null)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    Mods.Remove(find);
+
+                    // Same.
+                    int i = 0;
+                    while (i < Mods.Count && Mods[i].CompareTo(renamed) < 0) ++i;
+                    Mods.Insert(i, renamed);
+                });
+            }
         }
 
         private async Task PlayMod(Mod mod)
         {
             AppState = AppState.InGame;
             FileSystem.UnloadAll(EndIsNighPath);
+
             FileSystem.LoadMod(mod, EndIsNighPath);
             Process.Start(Path.Combine(EndIsNighPath, ExeName));
 
