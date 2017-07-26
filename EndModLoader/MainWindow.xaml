@@ -18,8 +18,10 @@
                  ItemsSource="{Binding Mods}" 
                  Style="{StaticResource ModListStyle}"
                  Grid.Row="1" 
-                 SelectionChanged="ModList_SelectionChanged"
-                 MouseDoubleClick="ModList_MouseDoubleClick" />
+                 AllowDrop="True"
+                 Drop="ModList_Drop"
+                 MouseDoubleClick="ModList_MouseDoubleClick" 
+                 SelectionChanged="ModList_SelectionChanged" />
         <Button Name="PlayButton" Style="{StaticResource PlayModButton}" Grid.Row="2" Click="PlayButton_Click" />
     </Grid>
 </Window>

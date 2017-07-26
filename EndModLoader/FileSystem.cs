@@ -13,14 +13,9 @@ namespace EndModLoader
 
         public static IEnumerable<Mod> ReadModFolder(string path)
         {
-            foreach (var file in Directory.GetFiles(path, "*.zip", SearchOption.TopDirectoryOnly))
+            foreach (var file in Directory.GetFiles(path, "*.zip", SearchOption.AllDirectories))
             {
                 yield return Mod.FromZip(file);
-            }
-
-            foreach (var dir in Directory.EnumerateDirectories(path))
-            {
-                yield return Mod.FromPath(dir);
             }
         }
 
@@ -45,7 +40,7 @@ namespace EndModLoader
             Watcher.EnableRaisingEvents = true;
         }
 
-        public static bool EnsureDir(string path, string folder)
+        public static void EnsureDir(string path, string folder)
         {
             var modPath = Path.Combine(path, folder);
             try
@@ -54,23 +49,26 @@ namespace EndModLoader
                 {
                     Directory.CreateDirectory(modPath);
                 }
-                return true;
             }
             catch (UnauthorizedAccessException e)
             {
-                return false;
+                throw e;
             }
         }
 
         public static void LoadMod(Mod mod, string path)
         {
-            if (mod.IsZip)
+            using (var zip = ZipFile.Open(mod.ModPath, ZipArchiveMode.Read))
             {
-                ZipFile.ExtractToDirectory(mod.ModPath, path);
-            }
-            else
-            {
-                CopyDirectory(mod.ModPath, path, ModFolders);
+                // Only extracts directories listed in ModFolders to prevent littering the directory
+                // and make it easier to delete it all afterwards.
+                foreach (var entry in zip.Entries.Where(
+                    e => ModFolders.Contains(Path.GetDirectoryName(e.FullName).Split('\\').First())
+                    && !string.IsNullOrEmpty(e.Name)
+                )) {
+                    Directory.CreateDirectory(Path.Combine(path, Path.GetDirectoryName(entry.FullName)));
+                    entry.ExtractToFile(Path.Combine(path, entry.FullName));
+                }
             }
         }
 
@@ -82,37 +80,6 @@ namespace EndModLoader
                 {
                     Directory.Delete(dir, recursive: true);
                 }
-            }
-        }
-
-        // Since having that in .NET is too much to ask for...
-        private static void CopyDirectory(string from, string to, params string[] filter)
-        {
-            var dir = new DirectoryInfo(from);
-
-            if (!dir.Exists)
-            {
-                throw new DirectoryNotFoundException(from);
-            }
-
-            if (!Directory.Exists(to))
-            {
-                Directory.CreateDirectory(to);
-            }
-
-            // Ignore the files when there's a directory filter.
-            // Mostly a hack to prevent meta.xml being copied around.
-            if (filter.Length == 0)
-            {
-                foreach (var file in dir.GetFiles())
-                {
-                    file.CopyTo(Path.Combine(to, file.Name), overwrite: true);
-                }
-            }
-
-            foreach (var sub in dir.GetDirectories())
-            {
-                CopyDirectory(sub.FullName, Path.Combine(to, sub.Name));
             }
         }
     }

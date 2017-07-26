@@ -11,7 +11,6 @@ namespace EndModLoader
         public string Author { get; private set; }
         public string Version { get; private set; }
         public string ModPath { get; private set; }
-        public bool IsZip { get; private set; }
 
         public static readonly string MetaFile = "meta.xml";
         public static readonly string MetaFileNotFound = $"no {MetaFile} found";
@@ -22,7 +21,7 @@ namespace EndModLoader
 
         public static Mod FromZip(string path)
         {
-            var mod = new Mod { ModPath = path, IsZip = true };
+            var mod = new Mod { ModPath = path };
 
             using (var zip = ZipFile.Open(path, ZipArchiveMode.Read))
             {
@@ -45,35 +44,8 @@ namespace EndModLoader
                         else if (element.Name == "version") mod.Version = element.Value;
                     }
                 }
-                catch (FileNotFoundException e) { }
+                catch (FileNotFoundException) { }
             }
-
-            return mod;
-        }
-
-        public static Mod FromPath(string path)
-        {
-            var mod = new Mod { ModPath = path, IsZip = false };
-
-            var meta = Path.Combine(path, MetaFile);
-            if (!File.Exists(meta))
-            {
-                mod.Title = new DirectoryInfo(path).Name;
-                return mod;
-            }
-
-            try
-            {
-                var doc = XDocument.Load(meta);
-
-                foreach (var element in doc.Root.Elements())
-                {
-                    if (element.Name == "title") mod.Title = element.Value;
-                    else if (element.Name == "author") mod.Author = element.Value;
-                    else if (element.Name == "version") mod.Version = element.Value;
-                }
-            }
-            catch (FileNotFoundException e) { }
 
             return mod;
         }
