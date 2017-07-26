@@ -5,14 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EndModLoader"
         mc:Ignorable="d"
-        Title="The End is Nigh MOD Loader" Height="380" Width="525" MinHeight="200" MinWidth="300">
+        Title="The End is Nigh MOD Loader" Height="380" Width="525" MinHeight="200" MinWidth="300"
+        Closed="Window_Closed">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBox Name="PathTextBox" Text="{Binding EndIsNighPath}" Grid.Row="0" Margin="0,0,0,10" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Name="PathText" Text="{Binding EndIsNighPath}" Style="{StaticResource PathText}" Grid.Row="0" Grid.Column="0" />
+            <Button Name="FolderButton" Style="{StaticResource FolderSelectButton}" Grid.Row="0" Grid.Column="1" Click="FolderButton_Click" />
+        </Grid>
         <ListBox Name="ModList" 
                  ItemTemplate="{StaticResource ModListTemplate}" 
                  ItemsSource="{Binding Mods}" 

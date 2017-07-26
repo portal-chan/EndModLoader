@@ -15,37 +15,73 @@
             <Setter Property="VerticalAlignment" Value="Bottom" />
         </Style>
 
+        <Style x:Key="PathText" TargetType="TextBlock">
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="IsEnabled" Value="True" />
+            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="Text" Value="{Binding EndIsNighPath}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding AppState}" Value="{x:Static local:AppState.IncorrectPath}">
+                    <Setter Property="Foreground" Value="Red" />
+                    <Setter Property="Cursor" Value="Help" />
+                    <Setter>
+                        <Setter.Property>ToolTip</Setter.Property>
+                        <Setter.Value>
+                            <ToolTip Content="{Binding ExeName}" ContentStringFormat="No {0} found in path."></ToolTip>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="ModListStyle" TargetType="ListBox">
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         </Style>
 
-        <Style x:Key="PlayModButton" TargetType="Button">
-            <Setter Property="HorizontalAlignment" Value="Left"></Setter>
-            <Setter Property="Margin" Value="0,10,0,0"></Setter>
-            <Setter Property="Width" Value="110"></Setter>
+        <Style x:Key="FolderSelectButton" TargetType="Button">
+            <Setter Property="Content" Value="Select" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="IsEnabled" Value="True" />
+            <Setter Property="Margin" Value="10,0,0,10" />
+            <Setter Property="Width" Value="90" />
             <Style.Triggers>
+                <DataTrigger Binding="{Binding AppState}" Value="{x:Static local:AppState.InGame}">
+                    <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PlayModButton" TargetType="Button">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="Margin" Value="0,10,0,0" />
+            <Setter Property="Width" Value="110" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding AppState}" Value="{x:Static local:AppState.IncorrectPath}">
+                    <Setter Property="Content" Value="Incorrect Path" />
+                    <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
                 <DataTrigger Binding="{Binding AppState}" Value="{x:Static local:AppState.NoModsFound}">
-                    <Setter Property="Content" Value="No Mods Found"></Setter>
-                    <Setter Property="IsEnabled" Value="False"></Setter>
+                    <Setter Property="Content" Value="No Mods Found" />
+                    <Setter Property="IsEnabled" Value="False" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding AppState}" Value="{x:Static local:AppState.NoModSelected}">
-                    <Setter Property="Content" Value="No Mod Selected"></Setter>
-                    <Setter Property="IsEnabled" Value="False"></Setter>
+                    <Setter Property="Content" Value="No Mod Selected" />
+                    <Setter Property="IsEnabled" Value="False" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding AppState}" Value="{x:Static local:AppState.ReadyToPlay}">
-                    <Setter Property="Content" Value="Play MOD"></Setter>
-                    <Setter Property="IsEnabled" Value="True"></Setter>
+                    <Setter Property="Content" Value="Play MOD" />
+                    <Setter Property="IsEnabled" Value="True" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding AppState}" Value="{x:Static local:AppState.InGame}">
-                    <Setter Property="Content" Value="In Game"></Setter>
-                    <Setter Property="IsEnabled" Value="False"></Setter>
+                    <Setter Property="Content" Value="In Game" />
+                    <Setter Property="IsEnabled" Value="False" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
 
         <DataTemplate x:Key="ModListTemplate">
             <StackPanel Margin="0.2" Orientation="Vertical">
-                <TextBlock Text="{Binding Title}" Style="{StaticResource TitleText}"/>
+                <TextBlock Text="{Binding Title}" Style="{StaticResource TitleText}" />
                 <Grid>
                     <TextBlock Text="{Binding Author, StringFormat='by {0}', TargetNullValue='{x:Static local:Mod.MetaFileNotFound}'}" Style="{StaticResource DescriptionText}"/>
                     <TextBlock Text="{Binding Version, TargetNullValue=''}" Style="{StaticResource DescriptionText}" TextAlignment="Right"/>

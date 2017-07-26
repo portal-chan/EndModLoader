@@ -2,6 +2,7 @@
 {
     public enum AppState
     {
+        IncorrectPath,
         NoModsFound,
         NoModSelected,
         ReadyToPlay,

@@ -8,18 +8,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace EndModLoader
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        // TODO: switch to HKEY_CURRENT_USER/Software/Valve/Steam/SteamPath
-        private static readonly string DefaultEndIsNighPath = Environment.Is64BitOperatingSystem ? 
-            "C:/Program Files (x86)/Steam/steamapps/common/theendisnigh/" :
-            "C:/Program Files/Steam/steamapps/common/theendisnigh/";
-
-        public string EndIsNighPath { get; set; } = DefaultEndIsNighPath;
-        private const string ExeName = "TheEndIsNigh.exe";
+        public static string ExeName { get => "TheEndIsNigh.exe"; }
         private string ModPath { get => Path.Combine(EndIsNighPath, "mods"); }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -27,7 +22,10 @@ namespace EndModLoader
         protected void NotifyPropertyChanged(string property) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
 
-        public ObservableCollection<Mod> Mods { get; private set; }
+        private void Window_Closed(object sender, EventArgs e) =>
+            Properties.Settings.Default.Save();
+
+        public ObservableCollection<Mod> Mods { get; private set; } = new ObservableCollection<Mod>();
 
         private AppState _appState;
         public AppState AppState
@@ -40,29 +38,53 @@ namespace EndModLoader
             }
         }
 
+        private string _endIsNighPath;
+        public string EndIsNighPath
+        {
+            // Amazing way to display the path properly.
+            get => _endIsNighPath?.Replace('\\', '/') ?? "";
+            private set
+            {
+                _endIsNighPath = value;
+                Properties.Settings.Default["EndIsNighPath"] = value;
+                NotifyPropertyChanged(nameof(EndIsNighPath));
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
             AppState = AppState.NoModSelected;
+            
+            // There is most certainly a better way to set this up,
+            // but I'm nearing the end of this project so it's good enough for me.
+            if (Properties.Settings.Default.Properties[nameof(EndIsNighPath)] == null)
+            {
+                EndIsNighPath = FileSystem.DefaultGameDirectory();
+            }
+            else
+            {
+                EndIsNighPath = Properties.Settings.Default[nameof(EndIsNighPath)] as string;
+            }
 
             try
             {
-                FileSystem.EnsureDir(EndIsNighPath, ModPath);
+                if (FileSystem.IsGamePathCorrect(EndIsNighPath))
+                { 
+                    FileSystem.SetupDir(ModPath);
+                    LoadModList(FileSystem.ReadModFolder(ModPath).OrderBy(m => m));
+                }
+                else
+                {
+                    AppState = AppState.IncorrectPath;
+                }
             }
             catch (UnauthorizedAccessException)
             {
                 MessageBox.Show("Could not create/open mods directory. Try running the program as Administrator.");
                 Environment.Exit(1);
             }
-
-            Mods = new ObservableCollection<Mod>(FileSystem.ReadModFolder(ModPath).OrderBy(m => m));
-            if (Mods.Count == 0)
-            {
-                AppState = AppState.NoModsFound;
-            }
-
-            FileSystem.EnableWatching(ModPath, OnAdd, OnRemove, OnRename);
         }
 
         private void OnAdd(object sender, FileSystemEventArgs e)
@@ -163,6 +185,45 @@ namespace EndModLoader
                 {
                     File.Move(file.FullName, Path.Combine(ModPath, file.Name));
                 }
+            }
+        }
+
+        private void LoadModList(IOrderedEnumerable<Mod> mods)
+        {
+            Mods.Clear();
+            foreach (var mod in mods.OrderBy(m => m))
+            {
+                Mods.Add(mod);
+            }
+
+            if (Mods.Count == 0) AppState = AppState.NoModsFound;
+            else if (ModList.SelectedIndex == -1) AppState = AppState.NoModSelected;
+            else AppState = AppState.ReadyToPlay;
+        }
+
+        private void FolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new CommonOpenFileDialog
+            {
+                IsFolderPicker = true,
+                Title = "Select The End Is Nigh Folder"
+            };
+
+            var result = dialog.ShowDialog();
+            if (result == CommonFileDialogResult.Ok)
+            {
+                EndIsNighPath = dialog.FileName;
+                Mods.Clear();
+            }
+
+            if (!FileSystem.IsGamePathCorrect(EndIsNighPath))
+            {
+                AppState = AppState.IncorrectPath;
+            }
+            else
+            {
+                LoadModList(FileSystem.ReadModFolder(ModPath).OrderBy(m => m));
+                FileSystem.EnableWatching(ModPath, OnAdd, OnRemove, OnRename);
             }
         }
     }

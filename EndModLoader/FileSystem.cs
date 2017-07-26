@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-
-using System.Threading.Tasks;
+using Microsoft.Win32;
 
 namespace EndModLoader
 {
     public static class FileSystem
     {
+        public static readonly object SteamPath = Registry.CurrentUser.GetValue(@"Software\Valve\Steam\SteamPath");
+
         private static readonly string[] ModFolders = { "audio", "data", "shaders", "swfs", "textures", "tilemaps" };
         private static FileSystemWatcher Watcher;
 
@@ -44,6 +45,11 @@ namespace EndModLoader
             Watcher.EnableRaisingEvents = true;
         }
 
+        public static void SetupDir(string path)
+        {
+             Directory.CreateDirectory(Path.Combine(path, "mods"));
+        }
+
         public static void EnsureDir(string path, string folder)
         {
             var modPath = Path.Combine(path, folder);
@@ -59,6 +65,9 @@ namespace EndModLoader
                 throw e;
             }
         }
+
+        public static bool IsGamePathCorrect(string path) =>
+            Directory.Exists(path) && File.Exists(Path.Combine(path, MainWindow.ExeName));
 
         public static void LoadMod(Mod mod, string path)
         {
@@ -84,6 +93,19 @@ namespace EndModLoader
                 {
                     Directory.Delete(dir, recursive: true);
                 }
+            }
+        }
+
+        public static string DefaultGameDirectory()
+        {
+            if (SteamPath != null)
+            {
+                return Path.Combine(SteamPath as string, @"steamapps\common\theendisnigh\");
+            }
+            else
+            {
+                // Return the users Program Files folder and let them find the directory themselves.
+                return Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
             }
         }
     }
