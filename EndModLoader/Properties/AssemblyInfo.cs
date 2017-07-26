@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("EndModLoader")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("portal-chan")]
 [assembly: AssemblyProduct("EndModLoader")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]

@@ -58,17 +58,11 @@ namespace EndModLoader
             DataContext = this;
             AppState = AppState.NoModSelected;
 
-            // There is most certainly a better way to set this up,
-            // but I'm nearing the end of this project so it's good enough for me.
-            if (Settings.Default.Properties[nameof(EndIsNighPath)] == null)
+            EndIsNighPath = Settings.Default[nameof(EndIsNighPath)] as string;
+            if (string.IsNullOrWhiteSpace(EndIsNighPath))
             {
                 EndIsNighPath = FileSystem.DefaultGameDirectory();
             }
-            else
-            {
-                EndIsNighPath = Settings.Default[nameof(EndIsNighPath)] as string;
-            }
-
             ReadyEndIsNighPath();
         }
 
