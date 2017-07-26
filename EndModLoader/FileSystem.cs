@@ -9,6 +9,7 @@ namespace EndModLoader
     public static class FileSystem
     {
         private static readonly string[] ModFolders = { "audio", "data", "shaders", "swfs", "textures", "tilemaps" };
+        private static FileSystemWatcher Watcher;
 
         public static IEnumerable<Mod> ReadModFolder(string path)
         {
@@ -21,6 +22,27 @@ namespace EndModLoader
             {
                 yield return Mod.FromPath(dir);
             }
+        }
+
+        public static void EnableWatching(
+            string path, 
+            FileSystemEventHandler addHandler, 
+            FileSystemEventHandler removeHandler,
+            RenamedEventHandler renameHandler
+        ) {
+            Watcher = new FileSystemWatcher
+            {
+                Path = path,
+                NotifyFilter = NotifyFilters.LastAccess |
+                               NotifyFilters.LastWrite |
+                               NotifyFilters.CreationTime |
+                               NotifyFilters.FileName
+            };
+
+            Watcher.Changed += addHandler;
+            Watcher.Deleted += removeHandler;
+            Watcher.Renamed += renameHandler;
+            Watcher.EnableRaisingEvents = true;
         }
 
         public static bool EnsureDir(string path, string folder)

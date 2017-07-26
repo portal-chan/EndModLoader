@@ -24,30 +24,29 @@ namespace EndModLoader
         {
             var mod = new Mod { ModPath = path, IsZip = true };
 
-            var zip = ZipFile.Open(path, ZipArchiveMode.Read);
-            var meta = zip.GetEntry(MetaFile);
-
-            if (meta == null)
+            using (var zip = ZipFile.Open(path, ZipArchiveMode.Read))
             {
-                mod.Title = Path.GetFileNameWithoutExtension(path);
-                return mod;
-            }
+                var meta = zip.GetEntry(MetaFile);
 
-            try
-            {
-                var stream = meta.Open();
-                var doc = XDocument.Load(stream);
-                foreach (var element in doc.Root.Elements())
+                if (meta == null)
                 {
-                    if (element.Name == "title") mod.Title = element.Value;
-                    else if (element.Name == "author") mod.Author = element.Value;
-                    else if (element.Name == "version") mod.Version = element.Value;
+                    mod.Title = Path.GetFileNameWithoutExtension(path);
+                    return mod;
                 }
-                // Seems to need to be closed explicitly,
-                // a `using` block doesn't close it by itself.
-                stream.Close();
+
+                try
+                {
+                    var stream = meta.Open();
+                    var doc = XDocument.Load(stream);
+                    foreach (var element in doc.Root.Elements())
+                    {
+                        if (element.Name == "title") mod.Title = element.Value;
+                        else if (element.Name == "author") mod.Author = element.Value;
+                        else if (element.Name == "version") mod.Version = element.Value;
+                    }
+                }
+                catch (FileNotFoundException e) { }
             }
-            catch (FileNotFoundException e) { }
 
             return mod;
         }
