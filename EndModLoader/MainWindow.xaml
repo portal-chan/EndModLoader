@@ -20,6 +20,7 @@
                  Grid.Row="1" 
                  AllowDrop="True"
                  Drop="ModList_Drop"
+                 KeyDown="ModList_KeyDown"
                  MouseDoubleClick="ModList_MouseDoubleClick" 
                  SelectionChanged="ModList_SelectionChanged" />
         <Button Name="PlayButton" Style="{StaticResource PlayModButton}" Grid.Row="2" Click="PlayButton_Click" />
