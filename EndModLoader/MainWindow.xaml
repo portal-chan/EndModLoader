@@ -13,13 +13,13 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid>
+        <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Name="PathText" Text="{Binding EndIsNighPath}" Style="{StaticResource PathText}" Grid.Row="0" Grid.Column="0" />
-            <Button Name="FolderButton" Style="{StaticResource FolderSelectButton}" Grid.Row="0" Grid.Column="1" Click="FolderButton_Click" />
+            <TextBlock Name="PathText" Text="{Binding EndIsNighPath}" Style="{StaticResource PathText}" Grid.Column="0" />
+            <Button Name="FolderButton" Style="{StaticResource FolderSelectButton}" Grid.Column="1" Click="FolderButton_Click" />
         </Grid>
         <ListBox Name="ModList" 
                  ItemTemplate="{StaticResource ModListTemplate}" 

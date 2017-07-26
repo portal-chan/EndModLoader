@@ -9,7 +9,7 @@ namespace EndModLoader
 {
     public static class FileSystem
     {
-        public static readonly object SteamPath = Registry.CurrentUser.GetValue(@"Software\Valve\Steam\SteamPath");
+        public static readonly object SteamPath = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Valve\Steam", "SteamPath", null);
 
         private static readonly string[] ModFolders = { "audio", "data", "shaders", "swfs", "textures", "tilemaps" };
         private static FileSystemWatcher Watcher;
@@ -47,18 +47,10 @@ namespace EndModLoader
 
         public static void SetupDir(string path)
         {
-             Directory.CreateDirectory(Path.Combine(path, "mods"));
-        }
-
-        public static void EnsureDir(string path, string folder)
-        {
-            var modPath = Path.Combine(path, folder);
             try
             {
-                if (!Directory.Exists(modPath) && Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(modPath);
-                }
+                Directory.CreateDirectory(Path.Combine(path, "mods"));
+                Directory.CreateDirectory(Path.Combine(path, "backup"));
             }
             catch (UnauthorizedAccessException e)
             {
@@ -85,6 +77,24 @@ namespace EndModLoader
             }
         }
 
+        public static void MakeSaveBackup(string path)
+        {
+            // If possible, finds the users save directory and backups a save before
+            // they start toying around with mods.
+            var save = TryFindSaveDirectory(path);
+            if (save != null)
+            {
+                foreach (var file in Directory.GetFiles(save))
+                {
+                    var backupFile = Path.Combine(path, "backup", new FileInfo(file).Name);
+                    if (!File.Exists(backupFile))
+                    {
+                        File.Copy(file, backupFile);
+                    }
+                }
+            }
+        }
+
         public static void UnloadAll(string path)
         {
             foreach (var dir in Directory.EnumerateDirectories(path))
@@ -107,6 +117,29 @@ namespace EndModLoader
                 // Return the users Program Files folder and let them find the directory themselves.
                 return Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
             }
+        }
+
+        public static string TryFindSaveDirectory(string gamePath)
+        {
+            
+            if (SteamPath != null)
+            {
+                foreach (var user in Directory.GetDirectories(Path.Combine(SteamPath as string, "userdata")))
+                {
+                    if (Directory.GetDirectories(user).Select(dir => new DirectoryInfo(dir).Name).Contains("583470"))
+                    {
+                        return Path.Combine(user, @"583470\remote");
+                    }
+                }
+            }
+            // Welp, no Steam save files, let's try something else 😼
+            if (Directory.Exists(Path.Combine(gamePath, @"Offline Storage\remote")))
+            {
+                return Path.Combine(gamePath, @"Offline Storage\remote");
+            }
+
+            // No luck, no save file support.
+            return null;
         }
     }
 }

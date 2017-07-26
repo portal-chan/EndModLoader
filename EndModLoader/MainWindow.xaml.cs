@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using EndModLoader.Properties;
 
 namespace EndModLoader
 {
@@ -23,7 +24,7 @@ namespace EndModLoader
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
 
         private void Window_Closed(object sender, EventArgs e) =>
-            Properties.Settings.Default.Save();
+            Settings.Default.Save();
 
         public ObservableCollection<Mod> Mods { get; private set; } = new ObservableCollection<Mod>();
 
@@ -46,7 +47,7 @@ namespace EndModLoader
             private set
             {
                 _endIsNighPath = value;
-                Properties.Settings.Default["EndIsNighPath"] = value;
+                Settings.Default["EndIsNighPath"] = value;
                 NotifyPropertyChanged(nameof(EndIsNighPath));
             }
         }
@@ -56,24 +57,31 @@ namespace EndModLoader
             InitializeComponent();
             DataContext = this;
             AppState = AppState.NoModSelected;
-            
+
             // There is most certainly a better way to set this up,
             // but I'm nearing the end of this project so it's good enough for me.
-            if (Properties.Settings.Default.Properties[nameof(EndIsNighPath)] == null)
+            if (Settings.Default.Properties[nameof(EndIsNighPath)] == null)
             {
                 EndIsNighPath = FileSystem.DefaultGameDirectory();
             }
             else
             {
-                EndIsNighPath = Properties.Settings.Default[nameof(EndIsNighPath)] as string;
+                EndIsNighPath = Settings.Default[nameof(EndIsNighPath)] as string;
             }
 
+            ReadyEndIsNighPath();
+        }
+
+        private void ReadyEndIsNighPath()
+        {
             try
             {
                 if (FileSystem.IsGamePathCorrect(EndIsNighPath))
-                { 
-                    FileSystem.SetupDir(ModPath);
+                {
+                    FileSystem.SetupDir(EndIsNighPath);
+                    FileSystem.MakeSaveBackup(EndIsNighPath);
                     LoadModList(FileSystem.ReadModFolder(ModPath).OrderBy(m => m));
+                    FileSystem.EnableWatching(ModPath, OnAdd, OnRemove, OnRename);
                 }
                 else
                 {
@@ -137,8 +145,8 @@ namespace EndModLoader
             {
                 AppState = AppState.InGame;
                 FileSystem.UnloadAll(EndIsNighPath);
-
                 FileSystem.LoadMod(mod, EndIsNighPath);
+
                 Process.Start(Path.Combine(EndIsNighPath, ExeName));
 
                 await HookGameExit("TheEndIsNigh", (s, ev) =>
@@ -216,15 +224,7 @@ namespace EndModLoader
                 Mods.Clear();
             }
 
-            if (!FileSystem.IsGamePathCorrect(EndIsNighPath))
-            {
-                AppState = AppState.IncorrectPath;
-            }
-            else
-            {
-                LoadModList(FileSystem.ReadModFolder(ModPath).OrderBy(m => m));
-                FileSystem.EnableWatching(ModPath, OnAdd, OnRemove, OnRename);
-            }
+            ReadyEndIsNighPath();
         }
     }
 }
