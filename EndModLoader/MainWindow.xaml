@@ -12,21 +12,14 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBox Name="PathTextBox" Text="{Binding EndIsNighPath}" Margin="0,0,0,10">
-        </TextBox>
-        <ListBox ItemsSource="{Binding Mods}" Name="ModList" HorizontalContentAlignment="Stretch" Grid.Row="1" SelectionChanged="ModList_SelectionChanged" MouseDoubleClick="ModList_MouseDoubleClick">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Margin="0.2" Orientation="Vertical">
-                        <TextBlock Text="{Binding Title}" Style="{StaticResource TitleText}"/>
-                        <Grid>
-                            <TextBlock Text="{Binding Author, StringFormat='by {0}', TargetNullValue='{x:Static local:Mod.MetaFileNotFound}'}" Style="{StaticResource DescriptionText}"/>
-                            <TextBlock Text="{Binding Version, TargetNullValue=''}" Style="{StaticResource DescriptionText}" TextAlignment="Right"/>
-                        </Grid>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        <Button Name="PlayButton" Style="{StaticResource PlayModButton}" Grid.Row="2" Click="PlayButton_Click"></Button>
+        <TextBox Name="PathTextBox" Text="{Binding EndIsNighPath}" Margin="0,0,0,10" />
+        <ListBox Name="ModList" 
+                 ItemTemplate="{StaticResource ModListTemplate}" 
+                 ItemsSource="{Binding Mods}" 
+                 Style="{StaticResource ModListStyle}"
+                 Grid.Row="1" 
+                 SelectionChanged="ModList_SelectionChanged"
+                 MouseDoubleClick="ModList_MouseDoubleClick" />
+        <Button Name="PlayButton" Style="{StaticResource PlayModButton}" Grid.Row="2" Click="PlayButton_Click" />
     </Grid>
 </Window>

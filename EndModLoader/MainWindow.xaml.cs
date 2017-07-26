@@ -1,24 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 
 namespace EndModLoader
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        // TODO: switch to HKEY_CURRENT_USER/Software/Valve/Steam/SteamPath
         private static readonly string DefaultEndIsNighPath = Environment.Is64BitOperatingSystem ? 
             "C:/Program Files (x86)/Steam/steamapps/common/theendisnigh/" :
             "C:/Program Files/Steam/steamapps/common/theendisnigh/";
@@ -32,13 +27,13 @@ namespace EndModLoader
         protected void NotifyPropertyChanged(string property) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
 
-        public List<Mod> Mods { get; private set; }
+        public ObservableCollection<Mod> Mods { get; private set; }
 
         private AppState _appState;
         public AppState AppState
         {
             get => _appState;
-            set
+            private set
             {
                 _appState = value;
                 NotifyPropertyChanged(nameof(AppState));
@@ -56,9 +51,7 @@ namespace EndModLoader
                 MessageBox.Show("");
             }
 
-            Mods = FileSystem.ReadModFolder(ModPath).ToList();
-            Mods.Sort();
-
+            Mods = new ObservableCollection<Mod>(FileSystem.ReadModFolder(ModPath).OrderBy(m => m));
             if (Mods.Count == 0)
             {
                 AppState = AppState.NoModsFound;
@@ -67,17 +60,16 @@ namespace EndModLoader
 
         private async Task PlayMod(Mod mod)
         {
-            MessageBox.Show(EndIsNighPath);
-            //AppState = AppState.InGame;
-            //FileSystem.UnloadAll(EndIsNighPath);
-            //FileSystem.LoadMod(mod, EndIsNighPath);
-            //Process.Start(Path.Combine(EndIsNighPath, ExeName));
+            AppState = AppState.InGame;
+            FileSystem.UnloadAll(EndIsNighPath);
+            FileSystem.LoadMod(mod, EndIsNighPath);
+            Process.Start(Path.Combine(EndIsNighPath, ExeName));
 
-            //await HookGameExit("TheEndIsNigh", (s, ev) =>
-            //{
-            //    AppState = AppState.ReadyToPlay;
-            //    FileSystem.UnloadAll(EndIsNighPath);
-            //});
+            await HookGameExit("TheEndIsNigh", (s, ev) =>
+            {
+                AppState = AppState.ReadyToPlay;
+                FileSystem.UnloadAll(EndIsNighPath);
+            });
         }
 
         private async Task HookGameExit(string process, EventHandler hook)
