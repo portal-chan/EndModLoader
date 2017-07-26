@@ -46,9 +46,14 @@ namespace EndModLoader
             DataContext = this;
             AppState = AppState.NoModSelected;
 
-            if (!FileSystem.EnsureDir(EndIsNighPath, ModPath))
+            try
             {
-                MessageBox.Show("");
+                FileSystem.EnsureDir(EndIsNighPath, ModPath);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("Could not create/open mods directory. Try running the program as Administrator.");
+                Environment.Exit(1);
             }
 
             Mods = new ObservableCollection<Mod>(FileSystem.ReadModFolder(ModPath).OrderBy(m => m));
@@ -136,5 +141,17 @@ namespace EndModLoader
 
         private void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e) =>
             AppState = AppState.ReadyToPlay;
+
+        private void ModList_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+                foreach (var file in files.Select(f => new FileInfo(f)).Where(f => f.Extension == ".zip"))
+                {
+                    File.Move(file.FullName, Path.Combine(ModPath, file.Name));
+                }
+            }
+        }
     }
 }
