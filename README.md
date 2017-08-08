@@ -1,3 +1,10 @@
+<p align="center"> 
+    <img src="http://i.imgur.com/PLRap24.png" alt="Screenshot of the MOD loader">
+</p>
+
+### Download HERE:
+[🍉 v1.0 (latest)](https://github.com/portal-chan/EndModLoader/releases/download/v1.0/EndModLoader.exe)
+
 ### For players:
 Once you launch the program, assuming you have a Steam version of the game, the program will
 automatically initialize a `mods` folder in your games directory. Otherwise, click the "Select"
