@@ -133,9 +133,9 @@ namespace EndModLoader
                 }
             }
             // Welp, no Steam save files, let's try something else 😼
-            if (Directory.Exists(Path.Combine(gamePath, @"Offline Storage\remote")))
+            if (Directory.Exists(Path.Combine(gamePath, @"OfflineStorage\remote")))
             {
-                return Path.Combine(gamePath, @"Offline Storage\remote");
+                return Path.Combine(gamePath, @"OfflineStorage\remote");
             }
 
             // No luck, no save file support.
