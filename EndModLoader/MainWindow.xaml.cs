@@ -23,9 +23,6 @@ namespace EndModLoader
         protected void NotifyPropertyChanged(string property) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
 
-        private void Window_Closed(object sender, EventArgs e) =>
-            Settings.Default.Save();
-
         public ObservableCollection<Mod> Mods { get; private set; } = new ObservableCollection<Mod>();
 
         private AppState _appState;
@@ -64,6 +61,24 @@ namespace EndModLoader
                 EndIsNighPath = FileSystem.DefaultGameDirectory();
             }
             ReadyEndIsNighPath();
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            Settings.Default.Save();
+
+            if (AppState == AppState.InGame)
+            {
+                var result = MessageBox.Show(
+                    "It's recommended to quit the game before closing the MOD loader. Are you sure you want to quit anyways?",
+                    "Warning",
+                    MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Warning,
+                    MessageBoxResult.No
+                );
+
+                e.Cancel = result != MessageBoxResult.Yes;
+            }
         }
 
         private void ReadyEndIsNighPath()

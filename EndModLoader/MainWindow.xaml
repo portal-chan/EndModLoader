@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EndModLoader"
         mc:Ignorable="d"
         Title="The End is Nigh MOD Loader" Height="380" Width="525" MinHeight="200" MinWidth="300"
-        Closed="Window_Closed">
+        Closing="Window_Closing" >
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
