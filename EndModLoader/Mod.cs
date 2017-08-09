@@ -9,6 +9,7 @@ namespace EndModLoader
     public class Mod : IComparable<Mod>
     {
         public string Title { get; private set; }
+        public string Description { get; private set; }
         public string Author { get; private set; }
         public string Version { get; private set; }
         public string ModPath { get; private set; }
@@ -46,6 +47,7 @@ namespace EndModLoader
                         foreach (var element in doc.Root.Elements())
                         {
                             if (element.Name == "title") mod.Title = element.Value;
+                            else if (element.Name == "description" || element.Name == "desc") mod.Description = element.Value;
                             else if (element.Name == "author") mod.Author = element.Value;
                             else if (element.Name == "version") mod.Version = element.Value;
                         }

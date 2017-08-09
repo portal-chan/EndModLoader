@@ -7,12 +7,22 @@
         <Style x:Key="TitleText" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12" />
             <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
 
         <Style x:Key="DescriptionText" TargetType="TextBlock">
             <Setter Property="FontSize" Value="11" />
             <Setter Property="Foreground" Value="Gray" />
             <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="Margin" Value="5,0,0,0" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="BottomText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="Gray" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
 
         <Style x:Key="PathText" TargetType="TextBlock">
@@ -36,6 +46,7 @@
 
         <Style x:Key="ModListStyle" TargetType="ListBox">
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"></Setter>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding AppState}" Value="{x:Static local:AppState.InGame}">
                     <Setter Property="IsEnabled" Value="False" />
@@ -86,10 +97,17 @@
 
         <DataTemplate x:Key="ModListTemplate">
             <StackPanel Margin="0.2" Orientation="Vertical">
-                <TextBlock Text="{Binding Title}" Style="{StaticResource TitleText}" />
                 <Grid>
-                    <TextBlock Text="{Binding Author, StringFormat='by {0}', TargetNullValue='{x:Static local:Mod.MetaFileNotFound}'}" Style="{StaticResource DescriptionText}"/>
-                    <TextBlock Text="{Binding Version, TargetNullValue=''}" Style="{StaticResource DescriptionText}" TextAlignment="Right"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding Title}" Style="{StaticResource TitleText}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Description}" Style="{StaticResource DescriptionText}"/>
+                </Grid>
+                <Grid>
+                    <TextBlock Text="{Binding Author, StringFormat='by {0}', TargetNullValue='{x:Static local:Mod.MetaFileNotFound}'}" Style="{StaticResource BottomText}"/>
+                    <TextBlock Text="{Binding Version, TargetNullValue=''}" Style="{StaticResource BottomText}" TextAlignment="Right"/>
                 </Grid>
             </StackPanel>
         </DataTemplate>
