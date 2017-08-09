@@ -10,8 +10,8 @@ namespace EndModLoader
     public static class FileSystem
     {
         public static readonly object SteamPath = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Valve\Steam", "SteamPath", null);
+        public static readonly string[] ModFolders = { "audio", "data", "shaders", "swfs", "textures", "tilemaps" };
 
-        private static readonly string[] ModFolders = { "audio", "data", "shaders", "swfs", "textures", "tilemaps" };
         private static FileSystemWatcher Watcher;
 
         public static IEnumerable<Mod> ReadModFolder(string path)
@@ -102,6 +102,17 @@ namespace EndModLoader
                 if (ModFolders.Contains(new DirectoryInfo(dir).Name))
                 {
                     Directory.Delete(dir, recursive: true);
+                }
+            }
+        }
+
+        public static IEnumerable<string> ContainedFolders(string path, params string[] folders)
+        {
+            foreach (var dir in Directory.EnumerateDirectories(path))
+            {
+                if (folders.Contains(new DirectoryInfo(dir).Name))
+                {
+                    yield return new DirectoryInfo(dir).Name;
                 }
             }
         }

@@ -84,7 +84,12 @@ namespace EndModLoader
             }
             catch (UnauthorizedAccessException)
             {
-                MessageBox.Show("Could not create/open mods directory. Try running the program as Administrator.");
+                MessageBox.Show(
+                    "Could not create/open mods directory. Try running the program as Administrator.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
                 Environment.Exit(1);
             }
         }
@@ -137,8 +142,48 @@ namespace EndModLoader
         {
             if (AppState == AppState.ReadyToPlay)
             {
+                var contains = FileSystem.ContainedFolders(EndIsNighPath, FileSystem.ModFolders).ToList();
+                if (contains.Count != 0)
+                {
+                    // FINALLY an excuse to use tuples!
+                    var (isOrAre, a, folderOrFolders, itOrThem) = contains.Count == 1 ?
+                        ("is", "a ", "folder", "it") :
+                        ("are", "", "folders", "them");
+
+                    var result = MessageBox.Show(
+                        $"There {isOrAre} currently {a}modified {String.Join(", ", contains.Select(f => $"\"{f}\""))} {folderOrFolders} present in your game directory. " +
+                        $"Delete {itOrThem} to play the MOD?", 
+                        "Warning", 
+                        MessageBoxButton.YesNo, 
+                        MessageBoxImage.Warning,
+                        MessageBoxResult.No
+                    );
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        try
+                        {
+                            FileSystem.UnloadAll(EndIsNighPath);
+                        }
+                        catch (IOException)
+                        {
+                            MessageBox.Show(
+                                "Could not delete the modified folders because one or more of them are open in an another process.",
+                                "Error",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error
+                            );
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        // Let's not delete any more Cities of Tethys.
+                        return;
+                    }
+                }
+
                 AppState = AppState.InGame;
-                FileSystem.UnloadAll(EndIsNighPath);
                 FileSystem.LoadMod(mod, EndIsNighPath);
 
                 Process.Start(Path.Combine(EndIsNighPath, ExeName));
