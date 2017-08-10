@@ -16,6 +16,8 @@ namespace EndModLoader
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public static string ExeName { get => "TheEndIsNigh.exe"; }
+        public static string WindowTitle { get => "The End is Nigh MOD Loader v1.1"; }
+
         private string ModPath { get => Path.Combine(EndIsNighPath, "mods"); }
 
         public event PropertyChangedEventHandler PropertyChanged;

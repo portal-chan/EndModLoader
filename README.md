@@ -1,9 +1,10 @@
 <p align="center"> 
-    <img src="http://i.imgur.com/PLRap24.png" alt="Screenshot of the MOD loader">
+    <img src="http://i.imgur.com/RPIfEpl.png" alt="Screenshot of the MOD loader">
 </p>
 
 ### Download HERE:
-[🍉 v1.0 (latest)](https://github.com/portal-chan/EndModLoader/releases/download/v1.0/EndModLoader.exe)
+[😼 v1.1 (latest)](https://github.com/portal-chan/EndModLoader/releases/download/v1.1/EndModLoader.exe)    
+[🍉 v1.0](https://github.com/portal-chan/EndModLoader/releases/download/v1.0/EndModLoader.exe)
 
 ### For players:
 Once you launch the program, assuming you have a Steam version of the game, the program will
@@ -24,6 +25,7 @@ If no `meta.xml` is present, the title defaults to the name of the .zip file and
 ```xml
 <mod>
     <title>Your mod title</title>
+    <desc>Short mod info/description</desc>
     <author>Your name</author>
     <version>v1.0</version>
 </mod>
